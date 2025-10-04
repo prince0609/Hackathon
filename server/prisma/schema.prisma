@@ -16,8 +16,9 @@ model Company {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  admin Admin?   // Optional: one admin per company
-  users User[]   // one-to-many relation to users
+  admin         Admin?   // Optional: one admin per company
+  users         User[]   // one-to-many relation to users
+  expenses Expense[]
 }
 
 model Admin {
@@ -36,6 +37,7 @@ enum Role {
   EMPLOYEE
   DIRECTOR
   CFO
+  ADMIN
 }
 
 model User {
@@ -49,5 +51,95 @@ model User {
   is_approver Boolean  @default(false)
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
+
+  steps ApprovalStep[]
+  expenses Expense[]
+  expenseApprovals  ExpenseApproval[]
+  approvalFlows ApprovalFlow[]
 }
 
+enum ExpenseStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  IN_PROGRESS
+}
+
+model Expense {
+  id          Int      @id @default(autoincrement())
+  employee    User     @relation(fields: [employeeId], references: [id])
+  employeeId  Int
+  company     Company  @relation(fields: [companyId], references: [id])
+  companyId   Int
+  amount      Float
+  currency    String
+  category    String
+  description String?
+  date        DateTime
+  status      ExpenseStatus @default(PENDING)
+  is_receipt  Boolean       @default(false)
+  file_name   String?
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+
+  approvals   ExpenseApproval[]
+}
+
+
+model ApprovalFlow {
+  id          Int       @id @default(autoincrement())
+  user        User      @relation(fields: [userId], references: [id])
+  userId      Int
+  name        String
+  description String?
+  is_active   Boolean   @default(true)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  steps       ApprovalStep[]
+  approvals   ApprovalRule[]
+}
+
+model ApprovalStep {
+  id           Int          @id @default(autoincrement())
+  flow         ApprovalFlow @relation(fields: [flowId], references: [id])
+  flowId       Int
+  approver     User         @relation(fields: [approverId], references: [id])
+  approverId   Int
+  step_order   Int
+}
+
+enum RuleType {
+  PERCENTAGE
+  SPECIFIC
+  HYBRID
+}
+
+model ApprovalRule {
+  id                  Int          @id @default(autoincrement())
+  flow                ApprovalFlow @relation(fields: [flowId], references: [id])
+  flowId              Int
+  rule_type           RuleType
+  threshold_percentage Int?         // Optional, used for PERCENTAGE or HYBRID rules
+  created_at          DateTime     @default(now())
+  updated_at          DateTime     @updatedAt
+}
+
+enum ApprovalStatus {
+  APPROVED
+  REJECTED
+  PENDING
+}
+
+model ExpenseApproval {
+  id          Int      @id @default(autoincrement())
+  expense     Expense  @relation(fields: [expenseId], references: [id])
+  expenseId   Int
+  approver    User     @relation(fields: [approverId], references: [id])
+  approverId  Int
+  step_order  Int
+  status      ApprovalStatus
+  comment     String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
