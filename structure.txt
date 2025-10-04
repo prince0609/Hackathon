@@ -1,0 +1,22 @@
+hackathon
+├── README.md
+├── .env.example
+├── package.json
+├── server
+│   ├── package.json
+│   └── src
+│       ├── index.js
+│       ├── app.js
+│       ├── config
+│       │   └── db.js
+│       ├── controllers
+│       │   └── userController.js
+│       ├── routes
+│       │   └── api.js
+│       ├── models
+│       │   └── user.js
+│       ├── services
+│       │   └── authService.js
+│       └── utils
+│           └── logger.js
+└── client

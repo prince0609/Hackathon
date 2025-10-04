@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Company {
+  id         Int      @id @default(autoincrement())
+  name       String
+  country    String
+  currency   String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  admin Admin?   // Optional: one admin per company
+  users User[]   // one-to-many relation to users
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  company   Company  @relation(fields: [companyId], references: [id])
+  companyId Int      @unique     // One admin per company
+  name      String
+  email     String   @unique
+  password  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+enum Role {
+  MANAGER
+  EMPLOYEE
+  DIRECTOR
+  CFO
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  company     Company  @relation(fields: [companyId], references: [id])
+  companyId   Int
+  name        String
+  role        Role
+  password    String
+  email       String   @unique
+  is_approver Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
