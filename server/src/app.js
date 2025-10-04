@@ -6,6 +6,7 @@ const roleRoutes = require('./routes/role');
 const addExpenseRoutes = require('./routes/expense');
 const flowRoutes = require('./routes/flow');
 const path = require('path');
+const adminRoutes = require('./routes/adminRoutes');
 
 
 const app = express();
@@ -21,6 +22,7 @@ app.use('/api', authRoutes);
 app.use('/api', roleRoutes);
 app.use('/api', addExpenseRoutes);
 app.use('/api', flowRoutes);
+app.use('/api', require('./routes/adminRoutes')); // Admin routes
 
 // Error handling middleware
 app.use((err, req, res, next) => {

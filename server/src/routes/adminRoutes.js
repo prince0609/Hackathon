@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { PrismaClient } = require('@prisma/client'); // Adjust the path as necessary
 const prisma = new PrismaClient();
+const sendEmail = require('../utils/mailer'); // hypothetical email service
 
 // sign up route for company and admin user
 router.post('/signup', async (req, res) => {
@@ -27,16 +28,19 @@ router.post('/signup', async (req, res) => {
         });
 
         //create admin entry in user table
-        await prisma.user.create({
-            data: {
-                email: adminEmail,
-                name: adminName,
-                companyId: company.id,
-                role: 'ADMIN',
-                is_approver: true,
-                password: adminPassword || 'defaultPassword', // In real app, hash the password and don't use default
-            },
-        });
+//         await prisma.user.create({
+//             data: {
+//                 email: adminEmail,
+//                 name: adminName,
+//                 companyId: company.id,
+//                 role: 'ADMIN',
+//                 is_approver: true,
+//                 password: adminPassword || 'defaultPassword', // In real app, hash the password and don't use default
+//             },
+//         });
+
+        // Send welcome email
+        await sendEmail(adminEmail, 'Welcome to Expense Management System', `Hello ${adminName},\n\nYour admin account has been created for ${companyName}.\n\nBest regards,\nExpense Management Team`);
 
         res.status(201).json({ company, adminUser });
     } catch (error) {
